@@ -6,6 +6,7 @@ import { IDataObject } from '../interfaces/data-object';
 import { IDataResource } from '../interfaces/data-resource';
 import { Base } from '../services/base';
 import { Resource } from '../resource';
+import { Converter } from './converter';
 
 export class ResourceRelationshipsConverter {
     private getService: Function;
@@ -13,23 +14,26 @@ export class ResourceRelationshipsConverter {
     private relationships_dest: IRelationships;
     private included_resources: IResourcesByType;
     private schema: ISchema;
+    private path: string;
 
     public constructor(
         getService: Function,
         relationships_from: object,
         relationships_dest: IRelationships,
         included_resources: IResourcesByType,
-        schema: ISchema
+        schema: ISchema,
+        path: string
     ) {
         this.getService = getService;
         this.relationships_from = relationships_from;
         this.relationships_dest = relationships_dest;
         this.included_resources = included_resources;
         this.schema = schema;
+        this.path = path;
     }
 
     public buildRelationships(): void {
-        // recorro los relationships levanto el service correspondiente
+        // I go through the relationships I raise the corresponding service
         Base.forEach(this.relationships_from,
             (
                 relation_from_value: IDataCollection & IDataObject,
@@ -77,7 +81,7 @@ export class ResourceRelationshipsConverter {
     ) {
         let relation_type = (relation_from_value.data[0] ? relation_from_value.data[0].type : '');
         // @todo: we need check schema. maybe relationship it's empty
-        relation_type = relation_type || relation_key /* || schema.relationship.type */;
+        relation_type = this.schema.relationships[relation_type || relation_key].alias || relation_type || relation_key /* || schema.relationship.type */;
 
         if (this.getService(relation_type)) {
             this.__buildRelationshipCollection(relation_from_value, relation_key);
@@ -116,7 +120,7 @@ export class ResourceRelationshipsConverter {
         Base.forEach(
             relation_from_value.data,
             (relation_value: IDataResource) => {
-                let tmp = this.__buildRelationship(
+                const tmp = this.__buildRelationship(
                     relation_value,
                     this.included_resources
                 );
@@ -213,22 +217,25 @@ export class ResourceRelationshipsConverter {
             ];
         } else {
             // OPTIONAL: return cached Resource
-            let service = this.getService(resource_data_from.type);
-            if (
-                service &&
-                resource_data_from.id in service.cachememory.resources
-            ) {
-                return service.cachememory.resources[resource_data_from.id];
-            } else {
-                // we dont have information on included or memory. try pass to store
-                if (service) {
-                    service.cachestore
-                        .getResource(resource_data_from)
-                        .catch(noop);
-                }
-
-                return resource_data_from;
-            }
+            const res = Converter.json2resource(resource_data_from, false);
+            Converter.build({data: resource_data_from}, res);
+            res.path = this.path + `${res.type}/${res.id}`;
+            return res;
+            // const service = this.getService(resource_data_from.type);
+            // if (
+            //     service &&
+            //     resource_data_from.id in service.cachememory.resources
+            // ) {
+            //     return service.cachememory.resources[resource_data_from.id];
+            // } else {
+            //     // we dont have information on included or memory. try pass to store
+            //     if (service) {
+            //         service.cachestore
+            //             .getResource(resource_data_from)
+            //             .catch(noop);
+            //     }
+            //     return resource_data_from;
+            // }
         }
     }
 }

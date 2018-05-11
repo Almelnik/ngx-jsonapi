@@ -47,7 +47,7 @@ export class Converter {
         json_resource: IDataResource,
         instance_relationships
     ): Resource {
-        let resource_service = Converter.getService(json_resource.type);
+        const resource_service = Converter.getService(json_resource.type);
         if (resource_service) {
             return Converter.procreate(json_resource);
         } else {
@@ -97,7 +97,7 @@ export class Converter {
         document_from: IDataCollection | IDataObject,
         resource_dest: Resource | ICollection
     ) {
-        // instancio los include y los guardo en included arrary
+        // Instance include and I keep them in included arrary
         let included_resources: IResourcesByType = {};
         if ('included' in document_from) {
             included_resources = Converter.json_array2resources_array_by_type(
@@ -136,22 +136,22 @@ export class Converter {
         }
 
         // convert and add new dataresoures to final collection
-        let new_ids = {};
-        for (let dataresource of collection_data_from.data) {
-            if (!(dataresource.id in collection_dest)) {
-                collection_dest[dataresource.id] = Converter.getService(
-                    dataresource.type
+        const new_ids = {};
+        for (const dataResource of collection_data_from.data) {
+            if (!(dataResource.id in collection_dest)) {
+                collection_dest[dataResource.id] = Converter.getService(
+                    dataResource.type
                 ).cachememory.getOrCreateResource(
-                    dataresource.type,
-                    dataresource.id
+                    dataResource.type,
+                    dataResource.id
                 );
             }
             Converter._buildResource(
-                dataresource,
-                collection_dest[dataresource.id],
+                dataResource,
+                collection_dest[dataResource.id],
                 included_resources
             );
-            new_ids[dataresource.id] = dataresource.id;
+            new_ids[dataResource.id] = dataResource.id;
         }
 
         // remove old members of collection (bug, for example, when request something like orders/10/details and has new ids)
@@ -171,10 +171,10 @@ export class Converter {
         resource_dest.attributes = resource_data_from.attributes || {};
 
         resource_dest.is_new = false;
-        let service = Converter.getService(resource_data_from.type);
+        const service = Converter.getService(resource_data_from.type);
 
-        // esto previene la creación indefinida de resources
-        // el servicio debe estar sino no tenemos el schema
+        // this prevents the indefinite creation of resources
+        // the service must be if we do not have the schema
         if (!resource_dest.relationships || !service) {
             return;
         }
@@ -186,7 +186,8 @@ export class Converter {
             resource_data_from.relationships || {},
             resource_dest.relationships,
             included_resources,
-            service.schema
+            service.schema,
+            resource_dest.path ? `/${resource_dest.path}/relationships/` : `${resource_dest.type}/${resource_dest.id}/relationships/`
         ).buildRelationships();
     }
 }

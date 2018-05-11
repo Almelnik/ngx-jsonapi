@@ -9,13 +9,14 @@ export class PathBuilder {
 
     public applyParams(
         service: Service,
-        params: IParamsResource | IParamsCollection = {}
+        params: IParamsResource | IParamsCollection = {},
+        path?: string
     ) {
         this.appendPath(service.getPrePath());
         if (params.beforepath) {
             this.appendPath(params.beforepath);
         }
-        this.appendPath(service.getPath());
+        this.appendPath(path ? path : service.getPath());
         if (params.include) {
             this.setInclude(params.include);
         }

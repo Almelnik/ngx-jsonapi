@@ -3,7 +3,6 @@ import { IDataResource } from '../interfaces/data-resource';
 import { IDataCollection } from '../interfaces/data-collection';
 import { Core } from '../core';
 import { Base } from './base';
-import { IObject } from '../interfaces/object';
 import { Resource } from '../resource';
 import { Converter } from './converter';
 
@@ -12,9 +11,9 @@ export class CacheStore implements ICache {
         resource: Resource /* | IDataResource*/,
         include: Array<string> = []
     ): Promise<object> {
-        let mypromise: Promise<object> = new Promise(
+        let myPromise: Promise<object> = new Promise(
             (resolve, reject): void => {
-                Core.injectedServices.JsonapiStoreService.getObjet(
+                Core.injectedServices.JsonapiStoreService.getObject(
                     resource.type + '.' + resource.id
                 )
                     .then(success => {
@@ -54,11 +53,11 @@ export class CacheStore implements ICache {
 
                         resource.lastupdate = success._lastupdate_time;
 
-                        // no debo esperar a que se resuelvan los include
+                        // I must not wait for the include to be resolved
                         if (promises.length === 0) {
                             resolve(success);
                         } else {
-                            // esperamos las promesas de los include antes de dar el resolve
+                            // we wait for the promises of the include before giving the resolve
                             Promise.all(promises)
                                 .then(success3 => {
                                     resolve(success3);
@@ -83,7 +82,7 @@ export class CacheStore implements ICache {
             }
         );
 
-        return mypromise;
+        return myPromise;
     }
 
     public setResource(resource: Resource) {
@@ -123,7 +122,7 @@ export class CacheStore implements ICache {
         resolve: (value: ICollection) => void,
         reject: () => void
     ) {
-        let promise = Core.injectedServices.JsonapiStoreService.getObjet(
+        let promise = Core.injectedServices.JsonapiStoreService.getObject(
             'collection.' + url
         );
         promise
@@ -131,7 +130,7 @@ export class CacheStore implements ICache {
                 // build collection from store and resources from memory
                 // @todo success.data is a collection, not an array
                 if (
-                    this.fillCollectionWithArrrayAndResourcesOnMemory(
+                    this.fillCollectionWithArrayAndResourcesOnMemory(
                         success.data,
                         collection
                     )
@@ -153,10 +152,10 @@ export class CacheStore implements ICache {
                         // just for precaution, we not rewrite server data
                         if (collection.$source !== 'new') {
                             console.warn(
-                                'ts-angular-json: esto no debería pasar. buscar eEa2ASd2#'
+                                'ts-angular-json: this should not happen. search eEa2ASd2#'
                             );
                             throw new Error(
-                                'ts-angular-json: esto no debería pasar. buscar eEa2ASd2#'
+                                'ts-angular-json: this should not happen. search eEa2ASd2#'
                             );
                         }
                         collection.$source = 'store'; // collection and resources from storeservice
@@ -173,20 +172,20 @@ export class CacheStore implements ICache {
             });
     }
 
-    private fillCollectionWithArrrayAndResourcesOnMemory(
-        dataresources: Array<IDataResource>,
+    private fillCollectionWithArrayAndResourcesOnMemory(
+        dataResources: Array<IDataResource>,
         collection: ICollection
     ): boolean {
         let all_ok = true;
-        for (let key in dataresources) {
-            let dataresource = dataresources[key];
+        for (let key in dataResources) {
+            let dataResource = dataResources[key];
 
-            let resource = this.getResourceFromMemory(dataresource);
+            let resource = this.getResourceFromMemory(dataResource);
             if (resource.is_new) {
                 all_ok = false;
                 break;
             }
-            collection[dataresource.id] = resource;
+            collection[dataResource.id] = resource;
         }
 
         return all_ok;
@@ -296,9 +295,9 @@ export class CacheStore implements ICache {
                 this.setResource(resource_for_save);
             } else {
                 console.warn(
-                    'No se pudo guardar en la cache el',
+                    'The cache could not be saved',
                     resource_for_save.type,
-                    'por no se ser Resource.',
+                    'for not being Resource.',
                     resource_for_save
                 );
             }

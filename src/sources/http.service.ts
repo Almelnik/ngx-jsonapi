@@ -43,7 +43,15 @@ export class Http {
             method !== 'get' ||
             !this.noDuplicatedHttpCallsService.hasPromises(path)
         ) {
-            let req = new HttpRequest(
+            if (data) {
+                data = JSON.parse(JSON.stringify(data, (key, value) => {
+                    if (value === null || value === undefined) {
+                        return '';
+                    }
+                    return value;
+                }))
+            }
+            const req = new HttpRequest(
                 method,
                 url + path,
                 data || null,
@@ -55,7 +63,7 @@ export class Http {
                 }
             );
 
-            let http_observable = this.http.request(req);
+            const http_observable = this.http.request(req);
 
             if (method === 'get') {
                 this.noDuplicatedHttpCallsService.setPromiseRequest(
@@ -73,7 +81,7 @@ export class Http {
             );
         }
 
-        let deferred: Deferred<IDataObject> = new Deferred();
+        const deferred: Deferred<IDataObject> = new Deferred();
         Core.me.refreshLoadings(1);
         fakeHttpPromise
             .then(success => {

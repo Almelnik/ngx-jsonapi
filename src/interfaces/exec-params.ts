@@ -5,5 +5,5 @@ export interface IExecParams {
     params?: IParamsCollection | IParamsResource | Function;
     fc_success?: Function;
     fc_error?: Function;
-    exec_type: 'all' | 'get' | 'delete' | 'save';
+    exec_type: 'all' | 'get' | 'delete' | 'save' | 'archive' | 'clone';
 }
