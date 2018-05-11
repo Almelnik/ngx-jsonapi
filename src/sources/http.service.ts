@@ -22,11 +22,11 @@ export class Http {
     ) {}
 
     public async delete(path: string, url: string = this.rsJsonapiConfig.url): Promise<IDataObject> {
-               return this.exec(url, path, 'DELETE');
+        return this.exec(url, path, 'DELETE');
     }
 
     public async get(path: string, url: string = this.rsJsonapiConfig.url): Promise<IDataObject> {
-               return this.exec(url, path, 'get');
+        return this.exec(url, path, 'get');
     }
 
     public async exec(
