@@ -30,7 +30,7 @@ export class Http {
     }
 
     public async exec(
-        url: string,
+        url: string = this.rsJsonapiConfig.url,
         path: string,
         method: string,
         data?: IDataObject,
@@ -49,7 +49,17 @@ export class Http {
                         return '';
                     }
                     return value;
-                }))
+                }));
+                const relationships = data.data.relationships;
+                if (relationships) {
+                    Object.keys(relationships).forEach(key => {
+                        if (!relationships[key].data
+                            || relationships[key].data.length === 0
+                            || Object.keys(relationships[key].data).length === 0) {
+                            delete data.data.relationships[key];
+                        }
+                    });
+                }
             }
             const req = new HttpRequest(
                 method,
