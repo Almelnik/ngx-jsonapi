@@ -1,7 +1,7 @@
 {
     "name": "vp-ngx-jsonapi",
     "description": "JSON API library for Angular",
-    "version": "1.1.9",
+    "version": "1.1.10",
     "scripts": {
         "build": "ts-node ./build/index.ts",
         "postbuild": "rimraf **/dist/**/*.ngsummary.json",

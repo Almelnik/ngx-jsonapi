@@ -214,9 +214,9 @@ export class Resource extends ParentResourceService {
     }
 
     public async customCall<T extends Resource>(
-        requestParams: {method: string, body?: IDataObject, postfixPath?: string, params?: IParamsResource},
-        fc_success,
-        fc_error) {
+        requestParams: {method: string, body?: IDataObject, postfixPath?: string, fullPath?: string, params?: IParamsResource},
+        fc_success?,
+        fc_error?): Promise<object> {
         const promiseArchive: Promise<object> = new Promise(
             (resolve, reject): void => {
                 if (this.is_saving || this.is_loading) {
@@ -232,7 +232,7 @@ export class Resource extends ParentResourceService {
                 const body = requestParams.body === undefined ? this.toObject(requestParams.params) : requestParams.body;
                 const promise = Core.injectedServices.JsonapiHttp.exec(
                     this.getService().url,
-                    path.get(),
+                    requestParams.fullPath || path.get(),
                     requestParams.method,
                     body,
                     isFunction(fc_error)
