@@ -81,7 +81,9 @@ export class ResourceRelationshipsConverter {
     ) {
         let relation_type = (relation_from_value.data[0] ? relation_from_value.data[0].type : '');
         // @todo: we need check schema. maybe relationship it's empty
-        relation_type = this.schema.relationships[relation_type || relation_key].alias || relation_type || relation_key /* || schema.relationship.type */;
+        relation_type = (this.schema.relationships[relation_key || relation_type] && this.schema.relationships[relation_key || relation_type].alias)
+            || relation_type
+            || relation_key /* || schema.relationship.type */;
 
         if (this.getService(relation_type)) {
             this.__buildRelationshipCollection(relation_from_value, relation_key);
